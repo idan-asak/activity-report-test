@@ -30,11 +30,13 @@
                         <input class="form-control w-100 mt-2" name="comment" placeholder="例: 今日も朝活を頑張れました！" />
                     </div>
                     
+                    <div class="form-check mt-4">
+                        <input type="checkbox" class="form-check-input" id="postToXCheck">
+                        <label class="form-check-label" for="postToXCheck">X（Twitter）にも投稿する</label>
+                    </div>
+
                     <div class="text-center">
                         <input type="submit" class="mt-4 btn btn-primary btn-lg" value="コミュニティに報告する">
-                        <button id="postToX" class="mt-4 btn btn-info btn-lg ml-3">
-                            <i class="fa fa-twitter"></i> Xにポスト
-                        </button>
                     </div>
                 </form>
             </div>
@@ -80,6 +82,7 @@
                 event.preventDefault();
                 const goal = $('textarea[name="goal"]').val();
                 const comment = $('input[name="comment"]').val();
+                const postToX = $('#postToXCheck').is(':checked');
 
                 let msg;
                 if (comment.trim()) {
@@ -91,16 +94,10 @@
                 // LIFFでメッセージ送信
                 sendText(msg);
 
-                // X(Twitter)投稿
-                postToTwitter(goal, comment);
-            });
-
-            $('#postToX').click(function (event) {
-                event.preventDefault();
-                const goal = $('textarea[name="goal"]').val();
-                const comment = $('input[name="comment"]').val();
-
-                postToTwitter(goal, comment);
+                // チェックボックスがオンの場合、X(Twitter)に投稿
+                if (postToX) {
+                    postToTwitter(goal, comment);
+                }
             });
 
             function postToTwitter(goal, comment) {
