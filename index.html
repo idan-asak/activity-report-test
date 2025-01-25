@@ -1,9 +1,10 @@
-<html>
+<!DOCTYPE html>
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>朝活目標宣言</title>
+    <title>朝活報告</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/base/jquery-ui.min.css">
@@ -12,62 +13,28 @@
     <div class="container mt-5">
         <div class="card shadow-lg">
             <div class="card-header bg-primary text-white text-center">
-                <h3>朝活目標宣言フォーム</h3>
+                <h3>朝活報告フォーム</h3>
             </div>
             <div class="card-body">
-                <p class="text-center">今月の目標を記入して、送信してください</p>
+                <p class="text-center">今日の成果を記入して、送信してください(任意)</p>
                 <form id="goalForm" class="w-75 mx-auto">
-                    <p class="mt-3"><strong>朝活頻度の目標</strong></p>
-                    <div class="form-check">
-                        <input id="radio-a" class="form-check-input" type="radio" name="frequency" value="毎日" checked>
-                        <label for="radio-a" class="form-check-label">毎日</label>
-                    </div>
-                    <div class="form-check">
-                        <input id="radio-b" class="form-check-input" type="radio" name="frequency" value="週5日以上">
-                        <label for="radio-b" class="form-check-label">週5日以上</label>
-                    </div>
-                    <div class="form-check">
-                        <input id="radio-c" class="form-check-input" type="radio" name="frequency" value="週3日以上">
-                        <label for="radio-c" class="form-check-label">週3日以上</label>
-                    </div>
-                    <div class="form-check">
-                        <input id="radio-d" class="form-check-input" type="radio" name="frequency" value="週1日以上">
-                        <label for="radio-d" class="form-check-label">週1日以上</label>
+                    <p class="mt-3"><strong>今日の積み上げ</strong></p>
+                    
+                    <div>
+                       <textarea class="form-control w-100 mt-2" name="goal" placeholder="例:&#13;&#10;・読書&#13;&#10;・ブログ作成" rows="4" required></textarea>
                     </div>
 
-                    <p class="mt-4"><strong>今月の活動目標</strong></p>
-                    <p class="mt-n1">※より具体的な目標がある場合は記入してください</p>
-                    <div>例）勉強〇〇時間</div>
+                    <p class="mt-4"><strong>一言</strong></p>
+                    <p class="mt-n1">※朝活の感想や他の人に向けたコメントを入れてください（空欄可）</p>
                     <div>
-                        <input class="form-control w-100 mt-2" name="goal" required>
+                        <input class="form-control w-100 mt-2" name="comment" placeholder="例: 今日も朝活を頑張れました！" />
                     </div>
                     
                     <div class="text-center">
-                        <input type="submit" class="mt-4 btn btn-primary btn-lg" value="コミュニティに宣言する">
-
-			<script>
-    				$(function () {
-        				$('form').submit(function (event) {
-            					event.preventDefault();
-            					const frequency = $('input[name="frequency"]:checked').val();
-            					const goal = $('input[name="goal"]').val();
-            					const msg = `朝活頻度: ${frequency}\n今月の活動目標: ${goal}`;
-            					sendText(msg);
-
-				            	// Xにもポストするか確認
-            					const postToX = confirm("コミュニティに宣言しました。Xにもポストしますか？");
-            					if (postToX) {
-                					const postContent = `今月の #朝活目標宣言\n朝活頻度: ${frequency}\n今月の活動目標: ${goal}`;
-                					const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(postContent)}`;
-                					window.open(tweetUrl, '_blank');
-            					}
-        				});
-    				});
-			</script>
-
-                        <button id="postToX" class="mt-4 btn btn-lg ml-3" style="background-color: black; color: white;">
-   			<i class="fa fa-twitter"></i> Xにポスト
-			</button>
+                        <input type="submit" class="mt-4 btn btn-primary btn-lg" value="コミュニティに報告する">
+                        <button id="postToX" class="mt-4 btn btn-info btn-lg ml-3">
+                            <i class="fa fa-twitter"></i> Xにポスト
+                        </button>
                     </div>
                 </form>
             </div>
@@ -83,7 +50,7 @@
 
     <script>
         $(document).ready(function () {
-            const liffId = "2004976074-Da1L40Lm";
+            const liffId = "2006372055-O1K6qyZd";
             initializeLiff(liffId);
         });
 
@@ -111,21 +78,40 @@
         $(function () {
             $('form').submit(function (event) {
                 event.preventDefault();
-                const frequency = $('input[name="frequency"]:checked').val();
-                const goal = $('input[name="goal"]').val();
-                const msg = `朝活頻度: ${frequency}\n今月の活動目標: ${goal}`;
+                const goal = $('textarea[name="goal"]').val();
+                const comment = $('input[name="comment"]').val();
+
+                let msg;
+                if (comment.trim()) {
+                    msg = `【今日の積み上げ】\n ${goal}\n\n【一言】\n ${comment}`;
+                } else {
+                    msg = `【今日の積み上げ】\n ${goal}`;
+                }
+
+                // LIFFでメッセージ送信
                 sendText(msg);
+
+                // X(Twitter)投稿
+                postToTwitter(goal, comment);
             });
 
             $('#postToX').click(function (event) {
                 event.preventDefault();
-                const frequency = $('input[name="frequency"]:checked').val();
-                const goal = $('input[name="goal"]').val();
-                const postContent = `今月の #朝活目標宣言\n朝活頻度: ${frequency}\n今月の活動目標: ${goal}`;
-                
+                const goal = $('textarea[name="goal"]').val();
+                const comment = $('input[name="comment"]').val();
+
+                postToTwitter(goal, comment);
+            });
+
+            function postToTwitter(goal, comment) {
+                let postContent = `#今日の積み上げ\n${goal}`;
+                if (comment.trim()) {
+                    postContent += `\n\n${comment}`;
+                }
+
                 const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(postContent)}`;
                 window.open(tweetUrl, '_blank');
-            });
+            }
         });
     </script>
 </body>
